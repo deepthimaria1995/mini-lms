@@ -1,6 +1,8 @@
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { errorResponse, successResponse } from "@/lib/api-response";
+import { parseJson } from "@/lib/parse-json";
 
 function isValidName(value: string): boolean {
   const name = value.trim();
@@ -36,9 +38,14 @@ function isValidPassword(password: string): boolean {
 
 export async function POST(request: Request) {
   try {
-    const input = await request.json();
+    const { data: body, error: parseError } =
+      await parseJson(request);
 
-    const { firstName, lastName, email, password } = input;
+    if (parseError) {
+      return errorResponse(parseError, 400);
+    }
+
+    const { firstName, lastName, email, password } = body;
 
     // Validate field types.
     if (
@@ -47,39 +54,27 @@ export async function POST(request: Request) {
       typeof email !== "string" ||
       typeof password !== "string"
     ) {
-      return NextResponse.json(
-        { error: "All fields must be valid strings" },
-        { status: 400 }
-      );
+      return errorResponse("All fields must be valid strings", 400);
     }
 
     // Validate names.
     if (!isValidName(firstName) || !isValidName(lastName)) {
-      return NextResponse.json(
-        {
-          error:
-            "First name and last name must contain 1–50 valid characters.",
-        },
-        { status: 400 }
+      return errorResponse(
+        "First name and last name must contain 1–50 valid characters.",
+        400
       );
     }
 
     // Validate email.
     if (!isValidEmail(email)) {
-      return NextResponse.json(
-        { error: "Please provide a valid email address." },
-        { status: 400 }
-      );
+      return errorResponse("Please provide a valid email address.", 400);
     }
 
     // Validate password.
     if (!isValidPassword(password)) {
-      return NextResponse.json(
-        {
-          error:
-            "Password must contain 12–128 characters, including uppercase, lowercase, a number and a special character.",
-        },
-        { status: 400 }
+      return errorResponse(
+        "Password must contain 12–128 characters, including uppercase, lowercase, a number and a special character.",
+        400
       );
     }
 
@@ -97,19 +92,14 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+      return errorResponse(error.message, 400);
     }
 
-    return NextResponse.json(
-      {
-        message: "Registration successful",
-        user: data.user,
-      },
-      { status: 201 }
-    );
+    return successResponse({
+      message: "Registration successful",
+      user: data.user,
+      status: 201
+    });
   } catch {
     return NextResponse.json(
       { error: "Unable to register user" },

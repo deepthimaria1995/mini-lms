@@ -1,15 +1,20 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { errorResponse, successResponse } from "@/lib/api-response";
+import { parseJson } from "@/lib/parse-json";
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const { data: body, error: parseError } =
+      await parseJson(request);
+
+    if (parseError) {
+      return errorResponse(parseError, 400);
+    }
+    const { email, password } = body;
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 }
-      );
+      return errorResponse("Email and password are required", 400);
     }
 
     const supabase = await createClient();
@@ -21,13 +26,10 @@ export async function POST(request: Request) {
       });
 
     if (error) {
-      return NextResponse.json(
-        { error: "Invalid email or password" },
-        { status: 401 }
-      );
+      return errorResponse("Invalid email or password", 401);
     }
 
-    return NextResponse.json({
+    return successResponse({
       message: "Login successful",
       user: data.user,
     });
