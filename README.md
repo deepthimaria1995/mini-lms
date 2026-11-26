@@ -7,16 +7,16 @@ consultations.
 
 ## 1. Tech Stack
 
-  Technology             Purpose
-  ---------------------- ---------------------------------------------------
-  Next.js (App Router)   Frontend and API route handlers
-  React                  User interface
-  TypeScript             Type safety
-  Supabase Auth          User authentication
-  Supabase PostgreSQL    Database
-  Supabase SSR           Server-side authentication and session management
-  Tailwind CSS           Styling
-  shadcn/ui              UI components
+| Technology | Purpose |
+|---|---|
+| Next.js (App Router) | Frontend and API Route Handlers |
+| React | User interface |
+| TypeScript | Type safety |
+| Supabase Auth | User authentication |
+| Supabase PostgreSQL | Database |
+| Supabase SSR | Server-side authentication and session management |
+| Tailwind CSS | Styling |
+| shadcn/ui | UI components |
 
 ## 2. Features
 
