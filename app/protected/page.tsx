@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ConsultationsDashboard } from "@/components/consultations-dashboard";
+import { AdminConsultationsDashboard } from "@/components/admin-consultations-dashboard";
 import { Suspense } from "react";
 
 export default function ProtectedPage() {
@@ -19,18 +20,48 @@ async function ProtectedContent() {
 
   if (!user) redirect("/auth/login");
 
-  const [{ data: profile }, { data: consultations, error }] = await Promise.all([
-    supabase
-      .from("profiles")
-      .select("first_name,last_name")
-      .eq("id", user.id)
-      .maybeSingle(),
-    supabase
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("first_name,last_name,role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (profile?.role === "admin") {
+    const { data: consultations, error } = await supabase
       .from("consultations")
-      .select("id,reason,scheduled_at,status,created_at,updated_at")
-      .eq("student_id", user.id)
-      .order("scheduled_at", { ascending: true }),
-  ]);
+      .select(`
+        id,
+        reason,
+        scheduled_at,
+        status,
+        student:profiles!consultations_student_id_fkey (
+          id,
+          first_name,
+          last_name
+        )
+      `)
+      .order("scheduled_at", { ascending: true });
+
+    const normalizedConsultations = (consultations || []).map((consultation) => ({
+      ...consultation,
+      student: Array.isArray(consultation.student)
+        ? consultation.student[0] || null
+        : consultation.student,
+    }));
+
+    return (
+      <AdminConsultationsDashboard
+        consultations={normalizedConsultations}
+        fetchError={error ? "Unable to load consultations." : null}
+      />
+    );
+  }
+
+  const { data: consultations, error } = await supabase
+    .from("consultations")
+    .select("id,reason,scheduled_at,status,created_at,updated_at")
+    .eq("student_id", user.id)
+    .order("scheduled_at", { ascending: true });
 
   return (
     <ConsultationsDashboard

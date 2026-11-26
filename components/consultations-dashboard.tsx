@@ -129,6 +129,49 @@ export function ConsultationsDashboard({ firstName, lastName, initialConsultatio
     }
   };
 
+  const completeConsultation = async () => {
+    if (!selected) return;
+
+    const completedId = selected.id;
+    setIsWorking(true);
+    setError(null);
+
+    setConsultations((current) =>
+      current.map((item) =>
+        item.id === completedId ? { ...item, status: "completed" } : item
+      )
+    );
+    setDetailsOpen(false);
+    setSelected(null);
+
+    try {
+      const response = await fetch(`/api/consultations/${completedId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "completed" }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result?.error?.message || "Unable to complete consultation.");
+      }
+
+      const updated = result.data as Consultation;
+      setConsultations((current) =>
+        current.map((item) => item.id === updated.id ? updated : item)
+      );
+      setNotice("Consultation completed successfully.");
+    } catch (caughtError) {
+      setConsultations((current) =>
+        current.map((item) =>
+          item.id === completedId ? { ...item, status: "scheduled" } : item
+        )
+      );
+      setError(caughtError instanceof Error ? caughtError.message : "Unable to complete consultation.");
+    } finally {
+      setIsWorking(false);
+    }
+  };
+
   const createConsultation = async () => {
     if (!reason.trim() || !scheduleDate || !scheduleTime) return;
     setIsWorking(true);
@@ -210,19 +253,23 @@ export function ConsultationsDashboard({ firstName, lastName, initialConsultatio
               <button
                 key={consultation.id}
                 type="button"
-                disabled={consultation.status === "cancelled"}
-                onClick={() => consultation.status !== "cancelled" && openConsultation(consultation)}
+                disabled={consultation.status === "cancelled" || consultation.status === "completed"}
+                onClick={() => consultation.status === "scheduled" && openConsultation(consultation)}
                 className={
                   consultation.status === "cancelled"
                     ? "cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 p-5 text-left opacity-70"
-                    : "rounded-xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:border-blue-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+                    : consultation.status === "completed"
+                      ? "cursor-not-allowed rounded-xl border border-slate-200 bg-white p-5 text-left"
+                      : "rounded-xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:border-blue-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                 }
               >
                 <span
                   className={
                     consultation.status === "cancelled"
                       ? "mb-3 inline-flex rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold capitalize text-red-700"
-                      : "mb-3 inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold capitalize text-blue-700"
+                      : consultation.status === "completed"
+                        ? "mb-3 inline-flex rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold capitalize text-green-700"
+                        : "mb-3 inline-flex rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold capitalize text-blue-700"
                   }
                 >
                   {consultation.status}
@@ -239,7 +286,7 @@ export function ConsultationsDashboard({ firstName, lastName, initialConsultatio
         setDetailsOpen(open);
         if (!open) setSelected(null);
       }}>
-        <DialogContent className="border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/50 sm:max-w-md">
+        <DialogContent className="border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/50 sm:max-w-2xl">
           {selected && (
             <>
               <DialogHeader>
@@ -247,7 +294,15 @@ export function ConsultationsDashboard({ firstName, lastName, initialConsultatio
                 <DialogDescription className="text-slate-500">{formatDate(selected.scheduled_at)}</DialogDescription>
               </DialogHeader>
               <p className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-slate-700">{selected.reason}</p>
-              <DialogFooter className="gap-2">
+              <DialogFooter className="flex w-full flex-row flex-wrap justify-end gap-2">
+                <Button
+                  type="button"
+                  className="h-11 shrink-0 whitespace-nowrap bg-blue-600 px-5 text-white hover:bg-blue-700 disabled:bg-slate-300"
+                  disabled={isWorking || selected.status !== "scheduled"}
+                  onClick={completeConsultation}
+                >
+                  {isWorking ? "Completing..." : "Complete consultation"}
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
@@ -259,7 +314,7 @@ export function ConsultationsDashboard({ firstName, lastName, initialConsultatio
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-10 border-red-200 bg-white text-red-600 hover:bg-red-50 hover:text-red-700 active:translate-y-0"
+                  className="h-10 shrink-0 whitespace-nowrap border-red-200 bg-white px-4 text-red-600 hover:bg-red-50 hover:text-red-700 active:translate-y-0"
                   onClick={openCancelConfirmation}
                 >
                   Cancel Consultation
