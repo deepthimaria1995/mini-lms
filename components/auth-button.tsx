@@ -5,25 +5,39 @@ import { LogoutButton } from "./logout-button";
 
 export async function AuthButton() {
   const supabase = await createClient();
-
-  // You can also use getUser() which will be slower.
   const { data } = await supabase.auth.getClaims();
-
   const user = data?.claims;
 
-  return user ? (
-    <div className="flex items-center gap-4">
-      Hey, {user.email}!
+  if (!user) {
+    return (
+      <div className="flex gap-2">
+        <Button asChild size="sm" variant="outline">
+          <Link href="/auth/login">Login</Link>
+        </Button>
+        <Button asChild size="sm" className="bg-blue-600 text-white hover:bg-blue-700">
+          <Link href="/auth/sign-up">Sign up</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const userId = typeof user.sub === "string" ? user.sub : null;
+  const { data: profile } = userId
+    ? await supabase
+        .from("profiles")
+        .select("first_name,last_name")
+        .eq("id", userId)
+        .maybeSingle()
+    : { data: null };
+
+  const fullName = [profile?.first_name, profile?.last_name].filter(Boolean).join(" ");
+
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-sm font-medium text-slate-700">
+        Hey, {fullName || "Learner"}
+      </span>
       <LogoutButton />
-    </div>
-  ) : (
-    <div className="flex gap-2">
-      <Button asChild size="sm" variant={"outline"}>
-        <Link href="/auth/login">Sign in</Link>
-      </Button>
-      <Button asChild size="sm" variant={"default"}>
-        <Link href="/auth/sign-up">Sign up</Link>
-      </Button>
     </div>
   );
 }

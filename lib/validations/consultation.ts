@@ -37,6 +37,8 @@ export const updateConsultationSchema = z
       .optional(),
 
     is_completed: z.boolean().optional(),
+
+    status: z.enum(["scheduled", "completed", "cancelled"]).optional(),
   })
   .refine(
     (data) => Object.keys(data).length > 0,
