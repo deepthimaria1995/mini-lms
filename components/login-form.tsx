@@ -38,8 +38,10 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      // Update this route to redirect to an authenticated route. The user already has an active session.
+      setEmail("");
+      setPassword("");
       router.push("/protected");
+      router.refresh();
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -49,55 +51,74 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
+      <Card className="border-slate-200 bg-white p-2 shadow-lg shadow-slate-200/50">
+        <CardHeader className="px-4 pb-4 sm:px-6">
+          <CardTitle className="text-2xl text-slate-950">Log in</CardTitle>
+          <CardDescription className="text-slate-500">
+            Enter your details to access your account
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin}>
-            <div className="flex flex-col gap-6">
+        <CardContent className="px-4 pb-6 sm:px-6">
+          <form onSubmit={handleLogin} noValidate>
+            <div className="flex flex-col gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-slate-700">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="jane@example.com"
+                  autoComplete="email"
                   required
                   value={email}
+                  className="h-10 border-slate-300 bg-white text-slate-950 placeholder:text-slate-500"
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-slate-700">
+                    Password
+                  </Label>
                   <Link
                     href="/auth/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    className="ml-auto text-sm font-medium text-blue-700 underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
+                    Forgot password?
                   </Link>
                 </div>
                 <Input
                   id="password"
                   type="password"
+                  autoComplete="current-password"
                   required
                   value={password}
+                  className="h-10 border-slate-300 bg-white text-slate-950"
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+              {error && (
+                <p
+                  className="rounded-md bg-red-50 p-3 text-sm text-red-700"
+                  role="alert"
+                >
+                  {error}
+                </p>
+              )}
+              <Button
+                type="submit"
+                className="mt-1 h-10 w-full bg-blue-600 text-white hover:bg-blue-700"
+                disabled={isLoading}
+              >
+                {isLoading ? "Logging in..." : "Log in"}
               </Button>
             </div>
-            <div className="mt-4 text-center text-sm">
+            <div className="mt-5 border-t border-slate-100 pt-4 text-center text-sm text-slate-600">
               Don&apos;t have an account?{" "}
               <Link
                 href="/auth/sign-up"
-                className="underline underline-offset-4"
+                className="font-medium text-blue-700 underline-offset-4 hover:underline"
               >
                 Sign up
               </Link>
