@@ -1,110 +1,300 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# Mini-LMS -- Consultation Management System
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+A lightweight Learning Management System (LMS) built with **Next.js,
+TypeScript and Supabase**. Students can manage their own consultations,
+while administrators have a read-only view of all students and their
+consultations.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+## 1. Tech Stack
 
-## Features
+  Technology             Purpose
+  ---------------------- ---------------------------------------------------
+  Next.js (App Router)   Frontend and API route handlers
+  React                  User interface
+  TypeScript             Type safety
+  Supabase Auth          User authentication
+  Supabase PostgreSQL    Database
+  Supabase SSR           Server-side authentication and session management
+  Tailwind CSS           Styling
+  shadcn/ui              UI components
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Proxy
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+## 2. Features
 
-## Demo
+### Authentication
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+-   Student registration, login and logout.
+-   Session management using Supabase Auth.
+-   Role-based access for students and administrators.
 
-## Deploy to Vercel
+### Student Dashboard
 
-Vercel deployment will guide you through creating a Supabase account and project.
+-   View the authenticated student's consultations.
+-   Book a consultation.
+-   Reschedule an existing consultation.
+-   Cancel a consultation. Cancellation is represented through the consultation status 
+    field rather than deleting the database record.
+-   Mark each consultation complete.
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+### Consultation statuses
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+-   Scheduled
+-   Completed
+-   Cancelled
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+### Admin Dashboard
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+-   View all students and their consultation details.
+-   Sort the view according to student name and status.
+-   Read-only access: administrators cannot create, reschedule, cancel
+    or otherwise modify consultations through the admin dashboard for now.
 
-## Clone and run locally
+### Security
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+-   Server-side authentication and authorization checks protect restricted operations.
+-   Supabase Row Level Security (RLS) protects access to user and consultation records.
+    API endpoints validate incoming data.
+-   The authenticated user's ID is obtained from the server-side session rather than 
+    trusted from the request payload.
+-   Students can access only their own consultations.
+-   Admin access is restricted to users with the admin role.
+-   Public registration assigns the student role by default; users
+    cannot grant themselves admin access.
+-   API routes validate request data and enforce ownership and
+    permissions.
 
-2. Create a Next.js app using the Supabase Starter template npx command
+### Assumptions
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+- Each consultation is associated with one student.
+- Students are responsible for managing their own consultation bookings.
+- Consultation dates and times are stored using PostgreSQL TIMESTAMPTZ.
+- The application uses the browser's/local environment's timezone for displaying dates and times, unless otherwise configured.
+- Consultation cancellation retains the record for historical reference.
+- Administrators require visibility of all students and their consultation statuses but do not need editing capabilities.
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+## 3. Prerequisites
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+Install the following:
 
-3. Use `cd` to change into the app's directory
+-   Node.js (LTS version)
+-   npm
+-   Git
+-   Docker Desktop
+-   Supabase CLI
 
-   ```bash
-   cd with-supabase-app
-   ```
+Check your installations:
 
-4. Rename `.env.example` to `.env.local` and update the following:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=[INSERT SUPABASE PROJECT API PUBLISHABLE OR ANON KEY]
+``` bash
+node -v
+npm -v
+git --version
+docker --version
 ```
 
-> [!NOTE]
-> This example uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, which refers to Supabase's new **publishable** key format.
-> Both legacy **anon** keys and new **publishable** keys can be used with this variable name during the transition period. Supabase's dashboard may show `NEXT_PUBLIC_SUPABASE_ANON_KEY`; its value can be used in this example.
-> See the [full announcement](https://github.com/orgs/supabase/discussions/29260) for more information.
+## 4. Getting Started
 
-Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
+### Step 1: Clone the repository
 
-5. You can now run the Next.js local development server:
+``` bash
+git clone <YOUR_REPOSITORY_URL>
+cd mini-lms
+```
 
-   ```bash
-   npm run dev
-   ```
+### Step 2: Install dependencies
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+``` bash
+npm install
+```
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+### Step 3: Start local Supabase
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+Start Docker Desktop first.
 
-## Feedback and issues
+If Supabase has not been initialized in the project:
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+``` bash
+npx supabase init
+```
 
-## More Supabase examples
+Start the local Supabase services:
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+``` bash
+npx supabase start
+```
+
+Display the local service URLs and credentials:
+
+``` bash
+npx supabase status
+```
+
+The default local service URLs typically include:
+
+  Service           URL
+  ----------------- ------------------------
+  Supabase API      http://127.0.0.1:54321
+  Supabase Studio   http://127.0.0.1:54323
+  Mailpit           http://127.0.0.1:54324
+
+### Step 4: Configure environment variables
+
+Create a `.env.local` file in the project root.
+
+``` env
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<YOUR_LOCAL_PUBLISHABLE_KEY>
+```
+
+Get the local publishable key from:
+
+``` bash
+npx supabase status
+```
+
+### Step 5: Apply database migrations
+
+``` bash
+npx supabase db reset
+```
+
+This resets the local database and applies the migrations in
+`supabase/migrations/`.
+
+### Step 6: To provide a user admin role
+
+``` bash
+update public.profiles
+set role = 'admin'
+where id = 'YOUR_AUTH_USER_UUID';
+```
+
+New registrations are assigned the student role by default.
+To test the admin dashboard, an existing user must be assigned the admin role through a trusted database operation.
+For local development, this can be done through Supabase Studio by updating the relevant record in the profiles table.
+
+### Step 7: Run the application
+
+``` bash
+npm run dev
+```
+
+Open <http://localhost:3000>.
+
+## 5. Database Design
+
+### Profiles
+
+Stores application-specific information associated with a Supabase Auth
+user.
+
+  Column         Type          Description
+  -------------- ------------- ------------------------------------------------
+  `id`           UUID          References the Supabase Auth user ID
+  `first_name`   TEXT          User's first name
+  `last_name`    TEXT          User's last name
+  `role`         TEXT          Application role, such as `student` or `admin`
+  `created_at`   TIMESTAMPTZ   Profile creation timestamp
+
+### Consultations
+
+Stores consultation bookings.
+
+  Column           Type          Description
+  ---------------- ------------- --------------------------------------
+  `id`             UUID          Consultation primary key
+  `student_id`     UUID          References the student's profile
+  `reason`         TEXT          Reason for the consultation
+  `scheduled_at`   TIMESTAMPTZ   Scheduled consultation date and time
+  `status`         TEXT          Consultation status
+  `created_at`     TIMESTAMPTZ   Record creation timestamp
+  `updated_at`     TIMESTAMPTZ   Last update timestamp
+
+## 6. API Endpoints
+
+### Student consultation APIs
+
+  ---------------------------------------------------------------------------
+  Method                  Endpoint                    Description
+  ----------------------- --------------------------- -----------------------
+  `GET`                   `/api/consultations`        Retrieve the
+                                                      authenticated student's
+                                                      consultations
+
+  `POST`                  `/api/consultations`        Book a consultation
+
+  `PATCH`                 `/api/consultations/[id]`   Update or reschedule an
+                                                      existing consultation,
+                                                      including permitted
+                                                      status changes
+  ---------------------------------------------------------------------------
+
+### Admin API
+
+  ----------------------------------------------------------------------------
+  Method                  Endpoint                     Description
+  ----------------------- ---------------------------- -----------------------
+  `GET`                   `/api/admin/consultations`   Retrieve all students
+                                                       and their consultations
+                                                       for the admin read-only
+                                                       view
+
+  ----------------------------------------------------------------------------
+
+## 7. Authentication and Authorization
+
+Supabase Auth handles user authentication. The application uses the
+authenticated user's ID to determine which student records they can
+access.
+
+When a user registers:
+
+1.  Supabase creates the authentication record.
+2.  A database trigger creates the associated profile.
+3.  The profile receives the default `student` role.
+4.  Admin privileges are assigned separately through a trusted process.
+
+### Access control
+
+  -----------------------------------------------------------------------
+  Capability                            Student                     Admin
+  ------------------- ------------------------- -------------------------
+  View own                                  Yes                       NA
+  consultations                                 
+
+  View all students                          No                       Yes
+  consultations                             
+
+  Book a consultation                       Yes                        No
+
+  Reschedule own                            Yes                        No
+  consultation                                  
+
+  Cancel own                                Yes                        No
+  consultation                                   
+  -----------------------------------------------------------------------
+
+## 8. Useful Commands
+
+  -----------------------------------------------------------------------
+  Command                             Description
+  ----------------------------------- -----------------------------------
+  `npm install`                       Install project dependencies
+
+  `npm run dev`                       Start the development server
+
+  `npm run build`                     Build the application for
+                                      production
+
+  `npm run start`                     Start the production server
+
+  `npm run lint`                      Run lint checks, if configured
+
+  `npx supabase start`                Start local Supabase
+
+  `npx supabase stop`                 Stop local Supabase
+
+  `npx supabase status`               Display local Supabase service
+                                      information
+
+  `npx supabase db reset`             Reset the local database and apply
+                                      migrations
+  -----------------------------------------------------------------------
