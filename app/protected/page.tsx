@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { ConsultationsDashboard } from "@/components/consultations-dashboard";
 import { AdminConsultationsDashboard } from "@/components/admin-consultations-dashboard";
+import { StudentConsultationDashboard } from "@/components/student-consultation-dashboard";
 import { Suspense } from "react";
 
 export default function ProtectedPage() {
@@ -64,7 +64,7 @@ async function ProtectedContent() {
     .order("scheduled_at", { ascending: true });
 
   return (
-    <ConsultationsDashboard
+    <StudentConsultationDashboard
       firstName={profile?.first_name || "Learner"}
       lastName={profile?.last_name || ""}
       initialConsultations={consultations || []}

@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
@@ -13,7 +12,7 @@ import { CalendarIcon } from "lucide-react";
 
 type Consultation = { id: string; reason: string; scheduled_at: string; status: "scheduled" | "completed" | "cancelled" };
 
-export function ConsultationsDashboard({ firstName, lastName, initialConsultations, fetchError }: { firstName: string; lastName: string; initialConsultations: Consultation[]; fetchError: string | null }) {
+export function StudentConsultationDashboard({ firstName, lastName, initialConsultations, fetchError }: { firstName: string; lastName: string; initialConsultations: Consultation[]; fetchError: string | null }) {
   const [consultations, setConsultations] = useState(initialConsultations);
   const [selected, setSelected] = useState<Consultation | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);

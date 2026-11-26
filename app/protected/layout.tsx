@@ -1,6 +1,6 @@
-import { AuthButton } from "@/components/auth-button";
 import Link from "next/link";
 import { Suspense } from "react";
+import { PageHeader } from "@/components/page-header";
 
 export default function ProtectedLayout({
   children,
@@ -21,7 +21,7 @@ export default function ProtectedLayout({
             <span>Learning Portal</span>
           </Link>
           <Suspense>
-            <AuthButton />
+            <PageHeader />
           </Suspense>
         </div>
       </nav>
