@@ -186,58 +186,45 @@ Open <http://localhost:3000>.
 Stores application-specific information associated with a Supabase Auth
 user.
 
-  Column         Type          Description
-  -------------- ------------- ------------------------------------------------
-  `id`           UUID          References the Supabase Auth user ID
-  `first_name`   TEXT          User's first name
-  `last_name`    TEXT          User's last name
-  `role`         TEXT          Application role, such as `student` or `admin`
-  `created_at`   TIMESTAMPTZ   Profile creation timestamp
+  ### Profiles Table
+
+| Column | Type | Description |
+|---|---|---|
+| `id` | UUID | References the Supabase Auth user ID |
+| `first_name` | TEXT | User's first name |
+| `last_name` | TEXT | User's last name |
+| `role` | TEXT | Application role, such as `student` or `admin` |
+| `created_at` | TIMESTAMPTZ | Profile creation timestamp |
 
 ### Consultations
 
 Stores consultation bookings.
 
-  Column           Type          Description
-  ---------------- ------------- --------------------------------------
-  `id`             UUID          Consultation primary key
-  `student_id`     UUID          References the student's profile
-  `reason`         TEXT          Reason for the consultation
-  `scheduled_at`   TIMESTAMPTZ   Scheduled consultation date and time
-  `status`         TEXT          Consultation status
-  `created_at`     TIMESTAMPTZ   Record creation timestamp
-  `updated_at`     TIMESTAMPTZ   Last update timestamp
+| Column | Type | Description |
+|---|---|---|
+| `id` | UUID | Consultation primary key |
+| `student_id` | UUID | References the student's profile |
+| `reason` | TEXT | Reason for the consultation |
+| `scheduled_at` | TIMESTAMPTZ | Scheduled consultation date and time |
+| `status` | TEXT | Consultation status (e.g. `scheduled`, `completed`, `cancelled`) |
+| `created_at` | TIMESTAMPTZ | Record creation timestamp |
+| `updated_at` | TIMESTAMPTZ | Last update timestamp |
 
 ## 6. API Endpoints
 
-### Student consultation APIs
+### Student Consultation APIs
 
-  ---------------------------------------------------------------------------
-  Method                  Endpoint                    Description
-  ----------------------- --------------------------- -----------------------
-  `GET`                   `/api/consultations`        Retrieve the
-                                                      authenticated student's
-                                                      consultations
-
-  `POST`                  `/api/consultations`        Book a consultation
-
-  `PATCH`                 `/api/consultations/[id]`   Update or reschedule an
-                                                      existing consultation,
-                                                      including permitted
-                                                      status changes
-  ---------------------------------------------------------------------------
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/consultations` | Retrieve the authenticated student's consultations |
+| `POST` | `/api/consultations` | Book a new consultation |
+| `PATCH` | `/api/consultations/[id]` | Update or reschedule an existing consultation, including permitted status changes |
 
 ### Admin API
 
-  ----------------------------------------------------------------------------
-  Method                  Endpoint                     Description
-  ----------------------- ---------------------------- -----------------------
-  `GET`                   `/api/admin/consultations`   Retrieve all students
-                                                       and their consultations
-                                                       for the admin read-only
-                                                       view
-
-  ----------------------------------------------------------------------------
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/admin/consultations` | Retrieve all students and their consultations for the admin read-only dashboard |
 
 ## 7. Authentication and Authorization
 
@@ -252,49 +239,30 @@ When a user registers:
 3.  The profile receives the default `student` role.
 4.  Admin privileges are assigned separately through a trusted process.
 
-### Access control
+### Access Control
 
-  -----------------------------------------------------------------------
-  Capability                            Student                     Admin
-  ------------------- ------------------------- -------------------------
-  View own                                  Yes                       NA
-  consultations                                 
+| Capability | Student | Admin |
+|---|---|---|
+| View own consultations | Yes | Not applicable |
+| View all students and their consultations | No | Yes |
+| Book a consultation | Yes | No |
+| Reschedule own consultation | Yes | No |
+| Cancel own consultation | Yes | No |
+| Update own consultation status | Yes | No |
+| Modify other students' consultations | No | No |
 
-  View all students                          No                       Yes
-  consultations                             
-
-  Book a consultation                       Yes                        No
-
-  Reschedule own                            Yes                        No
-  consultation                                  
-
-  Cancel own                                Yes                        No
-  consultation                                   
-  -----------------------------------------------------------------------
+The admin dashboard provides read-only access to all students and their consultations. Administrators cannot create, reschedule, cancel or modify consultation records.
 
 ## 8. Useful Commands
 
-  -----------------------------------------------------------------------
-  Command                             Description
-  ----------------------------------- -----------------------------------
-  `npm install`                       Install project dependencies
-
-  `npm run dev`                       Start the development server
-
-  `npm run build`                     Build the application for
-                                      production
-
-  `npm run start`                     Start the production server
-
-  `npm run lint`                      Run lint checks, if configured
-
-  `npx supabase start`                Start local Supabase
-
-  `npx supabase stop`                 Stop local Supabase
-
-  `npx supabase status`               Display local Supabase service
-                                      information
-
-  `npx supabase db reset`             Reset the local database and apply
-                                      migrations
-  -----------------------------------------------------------------------
+| Command | Description |
+|---|---|
+| `npm install` | Install project dependencies |
+| `npm run dev` | Start the development server |
+| `npm run build` | Build the application for production |
+| `npm run start` | Start the production server |
+| `npm run lint` | Run lint checks, if configured |
+| `npx supabase start` | Start local Supabase |
+| `npx supabase stop` | Stop local Supabase |
+| `npx supabase status` | Display local Supabase service information |
+| `npx supabase db reset` | Reset the local database and apply migrations |
